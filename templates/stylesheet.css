@@ -1,0 +1,202 @@
+<html>
+<head>
+  <title>Arduino Serial Monitor</title>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script type=text/javascript>
+        autoscroll = 1;
+
+        function update(){
+          $.getJSON('/update_log_status', {func: "emptyvar"}, function(data) {
+            var text = "";
+            for(let i = 0; i < data.text.length; i++){ 
+              text = text + data.text[i] + "<br>";
+            }
+            document.getElementById("serial_text").innerHTML = text;
+            if (autoscroll){
+              document.getElementById("serial_text").scrollTop = document.getElementById("serial_text").scrollHeight;
+              document.getElementById("serial_text").scrollRight = document.getElementById("serial_text").scrollRight;
+              }
+            });
+          return false;
+        }
+        var interval = setInterval(update, 10);
+
+        function setAutoscroll() {
+          autoscroll = document.getElementById("autoscroll").checked;
+        }
+
+        function clearOutput(){
+          $.getJSON('/clearSerialOutput', {}, function(data) {
+            return false;
+        });
+        document.getElementById("serial_text").innerHTML = "";
+        }
+
+        function send_serial_data(){
+          serial_data_to_send = document.getElementById("data_input").value;
+          console.log(serial_data_to_send);
+          $.getJSON('/send_serial_data', {data: serial_data_to_send}, function(data) {
+            serial_data_to_send = document.getElementById("data_input").value = ""
+            });
+          return false;
+        }
+
+</script>
+
+<style>
+  body{
+    background-color: #181e23;
+    margin:0;
+    padding:5px
+  }
+  h1#head_title{
+    font-family:'Courier New';
+    font-size: 40px;
+    text-align: center;
+    color: #6ead99;
+    width: 100%;
+  }
+
+
+  .form-field {
+    position: relative;
+    left: 0px;
+    height: 5%;
+    width: 100%;
+    padding: 0px 8px;
+    line-height: 30px;
+    font-size: 20px;
+    font-weight: 500;
+    font-family: inherit;
+    -webkit-appearance: none;
+    color: #686868;
+    border: 1px solid white;
+    background: #fff;
+    transition: border 0.3s ease;
+  }
+  .form-field::placeholder {
+    color: #cbd1dc;
+  }
+  .form-field:focus {
+	 outline: none;
+  }
+
+  .send-data-button{
+      position: absolute;
+      right: 1px;
+      font-size: 18px;
+      height: 5%;
+      width: auto;
+      background-color: #181e23;
+      color: white;
+      border: 2px solid rgb(0, 0, 0);
+      line-height: 10px;
+      font-weight: 700;   
+      padding: 10px;
+  }
+
+  .send-data-button:focus{
+    outline: none;
+  }
+  .send-data-button:hover{
+    color: #181e23;
+    background-color: white;
+    border: 2px solid rgb(109, 109, 109);
+  }
+  .send-data-button:active{
+    color: #181e23;
+    background-color: grey;
+  }
+
+  div#serial_text{
+    position: relative;
+    right: 0px;
+    left: 0px;
+    top: 1%;
+    height:70%;
+    width: calc(100% - 10px);
+    overflow:auto;
+    background-color: #41708e;
+    color:white;
+    font-family:sans-serif;
+    padding-left: 10px;
+  }
+
+  .controlButtons{
+    display: flex; 
+    justify-content: flex-end;
+    position: relative;
+    top: 3%;
+    height: auto;
+  }
+
+  .control-button{
+    position: relative;
+    left: -2%;
+    width: auto;
+    padding: 10px;
+    background-color: #181e23;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    border: 2px solid white;
+    border-radius: 10px;
+  }
+  .control-button:hover{
+    background-color: white;
+    color:#181e23;
+  }
+  .control-button:focus{
+  outline: none;
+  }
+
+  .autoscroll_checkbox{
+  position: relative;
+  top: 11px;
+    width: auto;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .autoscroll_checkbox:hover{
+    background-color: white;
+    color:#181e23;
+  }
+  .autoscroll_checkbox:focus{
+  outline: none;
+  }
+
+  input[type="checkbox"] + label#autoscroll_label {
+    padding-top: 15px;
+    padding-left: 10px;
+    color: white;
+  }
+  input[type="checkbox"]{
+    transform: scale(2);
+  }
+
+</style>
+</head>
+
+<body>
+  <h1 id="head_title">Arduino Serial Monitor - {{port}}</h1>
+
+  <div>
+    <input id=data_input type="text" placeholder="" class="form-field"  onkeydown = "if (event.keyCode == 13) {send_serial_data();}">
+    <button onclick="send_serial_data()" class="send-data-button">Send  Data</button>
+  </div>
+  
+  <div id='serial_text'>
+    {% for row in text %}
+      {{row}}<br>
+    {% endfor %}
+  </div>
+
+  <div class=controlButtons>
+  <button class="control-button" type="button" id="clear_output" onclick="clearOutput()"> Clear Output </button>
+  <input class="autoscroll_checkbox" type="checkbox" id="autoscroll" onclick="setAutoscroll()" checked="True">
+  <label id="autoscroll_label" for="autoscroll">Autoscroll</label>
+  </div>
+
+</body>
+</html>
